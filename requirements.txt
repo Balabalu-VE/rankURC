@@ -1,4 +1,4 @@
-tapi==0.111.2
+tapi
 uvicorn==0.22.0
 sqlalchemy==2.0.48
 psycopg2-binary==2.9.11
