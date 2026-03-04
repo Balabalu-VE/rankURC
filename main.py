@@ -7,7 +7,7 @@ app = FastAPI()
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if not DATABASE_URL:
-        DATABASE_URL = "sqlite:///./local.db"
+        DATABASE_URL = "postgresql://urc_rankings_user:HJE2yXrSMxFtqS4bRcTSlw5t6KBcRmVc@dpg-d6juiq3h46gs73e26g8g-a.ohio-postgres.render.com/urc_rankings"
 engine = create_engine(DATABASE_URL)
 
 @app.get("/")
