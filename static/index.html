@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rank URC Items</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  .pair button { 
+    padding: 0; 
+    margin: 10px; 
+    border: none; 
+    background: none; 
+    cursor: pointer; 
+  }
+  .pair img { width: 300px; height: 170px; object-fit: cover; }
+  .pair img:hover { transform: scale(1.05); transition: 0.2s; }
+  h2 { margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<h1>Vote for your favorite!</h1>
+<div class="pair" id="pair"></div>
+
+<h2>Current Rankings</h2>
+<ol id="rankings"></ol>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  async function getPair() {
+    const res = await fetch("/pair");
+    const pair = await res.json();
+    const pairDiv = document.getElementById("pair");
+    pairDiv.innerHTML = ""; // clear previous buttons
+
+    pair.forEach((video, i) => {
+        const btn = document.createElement("button");
+        const img = document.createElement("img");
+        img.src = `https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`;
+        img.alt = video.title;
+        btn.dataset.id = video.id;
+
+        // Click vote
+        btn.addEventListener("click", () => {
+            const otherVideoId = pair[1 - i].id;
+            vote(video.id, otherVideoId);
+        });
+
+        // Video title
+        const titleEl = document.createElement("div");
+        titleEl.textContent = video.title;
+        titleEl.style.textAlign = "center";
+        titleEl.style.marginTop = "5px";
+        titleEl.style.fontSize = "14px";
+        titleEl.addEventListener("click", (event) => event.stopPropagation());
+
+        // Video link
+        const linkEl = document.createElement("a");
+        linkEl.href = `https://youtube.com/watch?v=${video.youtube_id}`;
+        linkEl.target = "_blank";
+        linkEl.textContent = "Watch on YouTube";
+        linkEl.style.display = "block";
+        linkEl.style.textAlign = "center";
+        linkEl.style.fontSize = "12px";
+        linkEl.style.marginBottom = "10px";
+        linkEl.addEventListener("click", (event) => event.stopPropagation());
+
+        btn.appendChild(img);
+        btn.appendChild(titleEl);
+        btn.appendChild(linkEl);
+
+        pairDiv.appendChild(btn);
+    });
+
+    // Add Skip button
+    const skipBtn = document.createElement("button");
+    skipBtn.textContent = "Skip";
+    skipBtn.style.display = "block";
+    skipBtn.style.margin = "20px auto";
+    skipBtn.style.padding = "10px 20px";
+    skipBtn.style.fontSize = "16px";
+    skipBtn.addEventListener("click", () => {
+        getPair(); // just fetch a new pair without voting
+    });
+    pairDiv.appendChild(skipBtn);
+}
+
+  async function vote(winnerId, loserId) {
+      await fetch("/vote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ winner_id: winnerId, loser_id: loserId })
+      });
+      await getRankings();
+      await getPair();
+  }
+
+  async function getRankings() {
+      const res = await fetch("/rankings");
+      const items = await res.json();
+      const ol = document.getElementById("rankings");
+      ol.innerHTML = "";
+      items.forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = `${item.title} — ${item.rating.toFixed(1)}`;
+          ol.appendChild(li);
+      });
+  }
+
+  // Initial load
+  getRankings();
+  getPair();
+
+});
+</script>
+
+</body>
+</html>
