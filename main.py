@@ -17,12 +17,12 @@ def home():
 @app.get("/init")
 def init():
         with engine.connect() as conn:
-                    conn.execute(text("""
-                                CREATE TABLE IF NOT EXISTS items (
-                                                id SERIAL PRIMARY KEY,
-                                                                name TEXT,
-                                                                                rating FLOAT DEFAULT 1200
-                                                                                            )
-                                                                                                    """))
-                            conn.commit()
-                                return {"status": "table created"}
+                conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS items (
+                id SERIAL PRIMARY KEY,
+                name TEXT,
+                rating FLOAT DEFAULT 1200
+                )
+                """))
+                conn.commit()
+                return {"status": "table created"}
