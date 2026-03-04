@@ -6,9 +6,6 @@ import os
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from fastapi.responses import FileResponse
-from pytube import Playlist
-
-
 
 # Use Render DATABASE_URL if available
 DATABASE_URL = os.environ.get("DATABASE_URL")
