@@ -6,17 +6,32 @@
 <title>Rank URC Items</title>
 <style>
   body { font-family: Arial, sans-serif; padding: 20px; }
-  .pair button { 
-    padding: 0; 
-    margin: 10px; 
-    border: none; 
-    background: none; 
-    cursor: pointer; 
-  }
+
   .pair img { width: 300px; height: 170px; object-fit: cover; }
   .pair img:hover { transform: scale(1.05); transition: 0.2s; }
   h2 { margin-top: 40px; }
+  .pair img {
+  width: 300px;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+button {
+    border: 2px solid black;
+    padding: 10px 20px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+.vote-button {
+    border: 2px solid black;
+    padding: 12px 20px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
 </style>
+
 </head>
 <body>
 
@@ -33,57 +48,66 @@ document.addEventListener("DOMContentLoaded", () => {
     const res = await fetch("/pair");
     const pair = await res.json();
     const pairDiv = document.getElementById("pair");
-    pairDiv.innerHTML = ""; // clear previous buttons
+    pairDiv.innerHTML = "";
 
     pair.forEach((video, i) => {
-        const btn = document.createElement("button");
+
+        const container = document.createElement("div");
+        container.style.display = "inline-block";
+        container.style.margin = "10px";
+        container.style.textAlign = "center";
+
+        // Link wrapper (thumbnail + title go to youtube)
+        const link = document.createElement("a");
+        link.href = `https://youtube.com/watch?v=${video.youtube_id}`;
+        link.target = "_blank";
+        link.style.textDecoration = "none";
+        link.style.color = "black";
+
         const img = document.createElement("img");
         img.src = `https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`;
         img.alt = video.title;
-        btn.dataset.id = video.id;
 
-        // Click vote
-        btn.addEventListener("click", () => {
+        const titleEl = document.createElement("div");
+        titleEl.textContent = video.title;
+        titleEl.style.marginTop = "5px";
+        titleEl.style.fontSize = "14px";
+
+        link.appendChild(img);
+        link.appendChild(titleEl);
+
+        // Vote button
+        const voteBtn = document.createElement("button");
+        voteBtn.classList.add("vote-button");
+        voteBtn.textContent = "Vote for this";
+        voteBtn.style.display = "block";
+        voteBtn.style.margin = "8px auto";
+        voteBtn.style.padding = "6px 12px";
+        voteBtn.style.cursor = "pointer";
+
+        voteBtn.addEventListener("click", () => {
             const otherVideoId = pair[1 - i].id;
             vote(video.id, otherVideoId);
         });
 
-        // Video title
-        const titleEl = document.createElement("div");
-        titleEl.textContent = video.title;
-        titleEl.style.textAlign = "center";
-        titleEl.style.marginTop = "5px";
-        titleEl.style.fontSize = "14px";
-        titleEl.addEventListener("click", (event) => event.stopPropagation());
+        container.appendChild(link);
+        container.appendChild(voteBtn);
 
-        // Video link
-        const linkEl = document.createElement("a");
-        linkEl.href = `https://youtube.com/watch?v=${video.youtube_id}`;
-        linkEl.target = "_blank";
-        linkEl.textContent = "Watch on YouTube";
-        linkEl.style.display = "block";
-        linkEl.style.textAlign = "center";
-        linkEl.style.fontSize = "12px";
-        linkEl.style.marginBottom = "10px";
-        linkEl.addEventListener("click", (event) => event.stopPropagation());
-
-        btn.appendChild(img);
-        btn.appendChild(titleEl);
-        btn.appendChild(linkEl);
-
-        pairDiv.appendChild(btn);
+        pairDiv.appendChild(container);
     });
 
-    // Add Skip button
+    // Skip button
     const skipBtn = document.createElement("button");
     skipBtn.textContent = "Skip";
     skipBtn.style.display = "block";
     skipBtn.style.margin = "20px auto";
     skipBtn.style.padding = "10px 20px";
     skipBtn.style.fontSize = "16px";
+
     skipBtn.addEventListener("click", () => {
-        getPair(); // just fetch a new pair without voting
+        getPair();
     });
+
     pairDiv.appendChild(skipBtn);
 }
 
@@ -98,15 +122,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function getRankings() {
-      const res = await fetch("/rankings");
-      const items = await res.json();
-      const ol = document.getElementById("rankings");
-      ol.innerHTML = "";
-      items.forEach(item => {
-          const li = document.createElement("li");
-          li.textContent = `${item.title} — ${item.rating.toFixed(1)}`;
-          ol.appendChild(li);
-      });
+    const res = await fetch("/rankings");
+    const items = await res.json();
+    const ol = document.getElementById("rankings");
+    ol.innerHTML = "";
+    items.forEach(item => {
+        const li = document.createElement("li");
+
+        const link = document.createElement("a");
+        link.href = `https://youtube.com/watch?v=${item.youtube_id}`;
+        link.target = "_blank";
+        link.textContent = `${item.title} — ${item.rating.toFixed(1)}`;
+        link.style.textDecoration = "none";
+        link.style.color = "black";
+
+        li.appendChild(link);
+        ol.appendChild(li);
+    });
   }
 
   // Initial load
