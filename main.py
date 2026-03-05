@@ -25,13 +25,12 @@ with open("youtube_videos.json", "r", encoding="utf-8") as f:
 async def lifespan(app: FastAPI):
         with engine.connect() as conn:
                 conn.execute(text("""
-                        DROP TABLE IF EXISTS items;
-                        CREATE TABLE items (
+                CREATE TABLE IF NOT EXISTS items (
                         id SERIAL PRIMARY KEY,
                         title TEXT NOT NULL,
                         youtube_id TEXT UNIQUE NOT NULL,
                         rating FLOAT DEFAULT 1200
-                        );
+                );
                 """))
                 conn.commit()
                 for v in videos:
